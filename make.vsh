@@ -10,18 +10,18 @@ mut context := build.context(
 
 context.task(
 	name: 'build'
-	run:  |self| system('v src/. -o ${app_name}')
+	run:  |self| system('v -enable-globals src/. -o ${app_name}')
 )
 
 context.task(
   name: 'debug'
-  run:  |self| system('v -g src/. -o ${app_name}')
+  run:  |self| system('v -g -enable-globals src/. -o ${app_name}')
 )
 
 context.task(
 	name:    'build-prod'
 	depends: ['format']
-	run:     |self| system('v -cc clang -prod src/. -o ${app_name}')
+	run:     |self| system('v -cc clang -prod -enable-globals src/. -o ${app_name}')
 )
 
 context.task(

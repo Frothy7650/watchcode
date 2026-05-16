@@ -5,7 +5,14 @@ import net.http
 import time
 import os
 
+__global (
+	times []i64
+  cr bool
+)
+
 fn main() {
+	os.signal_opt(.int, handle_sigint)!
+
 	if os.args.len < 2 {
 		eprintln('Please provide at least one URL')
 		exit(1)
@@ -32,7 +39,6 @@ fn main() {
 		loops = loops_str.int()
 	}
 
-	mut cr := false
 	if os.args.contains('-r') {
 		cr = true
 	}
@@ -64,10 +70,10 @@ fn main() {
 
 	if loops == 0 {
 		for {
-      if failures == 5 {
-        eprintln('GET request failed five times, exiting...')
-        exit(2)
-      }
+			if failures == 5 {
+				eprintln('GET request failed five times, exiting...')
+				exit(2)
+			}
 
 			// Capture loop start time
 			start := time.now()
@@ -88,6 +94,8 @@ fn main() {
 
 			// Get time for request
 			elapsed := time.since(start)
+
+			times << elapsed.milliseconds()
 
 			// Print url, time, and status
 			if cr {
@@ -104,10 +112,10 @@ fn main() {
 		}
 	} else {
 		for i := 0; i != loops; i++ {
-      if failures == 5 {
-        eprintln('GET request failed five times, exiting...')
-        exit(2)
-      }
+			if failures == 5 {
+				eprintln('GET request failed five times, exiting...')
+				exit(2)
+			}
 
 			// Capture loop start time
 			start := time.now()
@@ -129,6 +137,8 @@ fn main() {
 			// Get time for request
 			elapsed := time.since(start)
 
+			times << elapsed.milliseconds()
+
 			// Print url, time, and status
 			if cr {
 				print('\r${i + 1}. ${url} at ${time.now().custom_format('HH:mm:ss')}: ${status}, GET request took ${elapsed.str()}')
@@ -142,11 +152,17 @@ fn main() {
 				time.sleep(time.second - elapsed)
 			}
 		}
-		if cr {
-			print('\nDone!')
-		} else {
-			print('Done!')
+
+		mut average_time := i64(0)
+
+		for t in times {
+			average_time += t
 		}
+
+		average_time /= times.len
+
+		println('Average request time: ${average_time} ms')
+		print('Done!')
 	}
 }
 
@@ -158,4 +174,22 @@ fn dprintln(s string) {
 	$if debug {
 		println(s)
 	}
+}
+
+fn handle_sigint(_ os.Signal) {
+	mut average_time := i64(0)
+
+	for t in times {
+		average_time += t
+	}
+
+	average_time /= times.len
+
+  if cr {
+	  println('\nAverage request time: ${average_time} ms')
+  } else {
+    println('\nAverage request time: ${average_time} ms')
+  }
+	print('Bye!')
+	exit(0)
 }

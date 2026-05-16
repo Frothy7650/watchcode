@@ -18,11 +18,14 @@ fn main() {
 		exit(1)
 	}
 
+	dprintln(os.args.join(', '))
+
 	if os.args[1] == '--help' || os.args[1] == '-h' {
 		println("Watches URL's status code")
-		println('\t-n\tcontrol how many times the status code is checked, e.g. watchcode -n 5 https://example.com')
+		println('\t-n\tcontrol how many times the status code is checked, e.g. watchcode -n 5 https://example.com (default: infinite)')
 		println('\t-r\tprint all logs on 1 line, e.g. watchcode -r https://example.com')
-		print('\t-d\tconrol the delay inbetween checks(in seconds)')
+		println('\t-d\tconrol the delay inbetween checks(in seconds) (default: 1)')
+		print('\t-t\tcontrol how many times the GET request can fail before the program exits, (default: 3)')
 		return
 	}
 
@@ -39,6 +42,7 @@ fn main() {
 
 		loops = loops_str.int()
 	}
+	dprintln(loops.str())
 
 	mut delay := time.second
 	if os.args.contains('-d') {
@@ -53,10 +57,31 @@ fn main() {
 
 		delay = time.second * delay_str.int()
 	}
+	dprintln(delay.str())
+
+	mut tries := 3
+	if os.args.contains('-t') {
+		tries_str := os.args[os.args.index('-t') + 1]
+
+		for ch in tries_str {
+			if !is_digit(ch) {
+				eprintln('Invalid retry count: ${os.args[os.args.index('-t') + 1]}')
+				return
+			}
+		}
+
+		tries = tries_str.int()
+
+		if tries <= 0 {
+			tries = 1
+		}
+	}
+	dprintln(tries.str())
 
 	if os.args.contains('-r') {
 		cr = true
 	}
+	dprintln(cr.str())
 
 	mut url := ''
 
@@ -64,11 +89,11 @@ fn main() {
 		if i == 0 { continue
 		 }
 
-		if arg == '-n' || arg == '-r' || arg == '-d' {
+		if arg == '-n' || arg == '-r' || arg == '-d' || arg == '-t' {
 			continue
 		}
 
-		if i > 1 && (os.args[i - 1] == '-n' || os.args[i - 1] == '-d') {
+		if i > 1 && (os.args[i - 1] == '-n' || os.args[i - 1] == '-d' || os.args[i - 1] == '-t') {
 			continue
 		}
 
@@ -81,12 +106,14 @@ fn main() {
 		exit(1)
 	}
 
+	dprintln(url)
+
 	mut failures := 0
 
 	if loops == 0 {
 		for {
-			if failures == 3 {
-				eprintln('GET request failed three times, exiting...')
+			if failures == tries {
+				eprintln('GET request failed ${tries} times, exiting...')
 				exit(2)
 			}
 
@@ -120,15 +147,14 @@ fn main() {
 			}
 
 			// Wait 1 second minus the time it took
-			dprintln(elapsed.str())
 			if elapsed < delay {
 				time.sleep(delay - elapsed)
 			}
 		}
 	} else {
 		for i := 0; i != loops; i++ {
-			if failures == 3 {
-				eprintln('GET request failed three times, exiting...')
+			if failures == tries {
+				eprintln('GET request failed ${tries} times, exiting...')
 				exit(2)
 			}
 
@@ -162,7 +188,6 @@ fn main() {
 			}
 
 			// Wait 1 second minus the time it took
-			dprintln(elapsed.str())
 			if elapsed < delay {
 				time.sleep(delay - elapsed)
 			}

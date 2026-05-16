@@ -64,6 +64,11 @@ fn main() {
 
 	if loops == 0 {
 		for {
+      if failures == 5 {
+        eprintln('GET request failed five times, exiting...')
+        exit(2)
+      }
+
 			// Capture loop start time
 			start := time.now()
 
@@ -99,6 +104,11 @@ fn main() {
 		}
 	} else {
 		for i := 0; i != loops; i++ {
+      if failures == 5 {
+        eprintln('GET request failed five times, exiting...')
+        exit(2)
+      }
+
 			// Capture loop start time
 			start := time.now()
 

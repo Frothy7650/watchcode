@@ -14,11 +14,28 @@ fn main() {
 	os.signal_opt(.int, handle_sigint)!
 
 	if os.args.len < 2 {
-		eprintln('Please provide at least one URL')
+		eprintln('Please provide a URL')
 		exit(1)
 	}
 
 	dprintln(os.args.join(', '))
+
+  valid_args := ['-h', '-n', '-r', '-t', '-d']
+
+  for i := 1; i < os.args.len; i++ {
+    arg := os.args[i]
+    if arg !in valid_args {
+      if arg.starts_with('http://') {
+        continue
+      }
+      eprintln('Unknown argument: ${arg}')
+      exit(1)
+    }
+
+    if arg == '-n' || arg == '-t' || arg == '-d' {
+      i++
+    }
+  }
 
 	if os.args[1] == '--help' || os.args[1] == '-h' {
 		println("Watches URL's status code")

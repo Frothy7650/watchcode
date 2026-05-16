@@ -22,6 +22,7 @@ fn main() {
 		println("Watches URL's status code")
 		println('\t-n\tcontrol how many times the status code is checked, e.g. watchcode -n 5 https://example.com')
 		println('\t-r\tprint all logs on 1 line, e.g. watchcode -r https://example.com')
+    print('\t-d\tconrol the delay inbetween checks(in seconds)')
 		return
 	}
 

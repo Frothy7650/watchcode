@@ -7,7 +7,7 @@ import os
 
 __global (
 	times []i64
-  cr bool
+	cr    bool
 )
 
 fn main() {
@@ -22,7 +22,7 @@ fn main() {
 		println("Watches URL's status code")
 		println('\t-n\tcontrol how many times the status code is checked, e.g. watchcode -n 5 https://example.com')
 		println('\t-r\tprint all logs on 1 line, e.g. watchcode -r https://example.com')
-    print('\t-d\tconrol the delay inbetween checks(in seconds)')
+		print('\t-d\tconrol the delay inbetween checks(in seconds)')
 		return
 	}
 
@@ -40,8 +40,8 @@ fn main() {
 		loops = loops_str.int()
 	}
 
-  mut delay := time.second
-  if os.args.contains('-d') {
+	mut delay := time.second
+	if os.args.contains('-d') {
 		delay_str := os.args[os.args.index('-d') + 1]
 
 		for ch in delay_str {
@@ -174,15 +174,15 @@ fn main() {
 			average_time += t
 		}
 
-    if times.len != 0 && average_time != 0 {
-  		average_time /= times.len
-    }
+		if times.len != 0 && average_time != 0 {
+			average_time /= times.len
+		}
 
-    if cr {
-      println('\nAverage request time: ${average_time} ms')
-    } else {
-      println('\rAverage request time: ${average_time} ms')
-    }
+		if cr {
+			println('\nAverage request time: ${average_time} ms')
+		} else {
+			println('\rAverage request time: ${average_time} ms')
+		}
 		print('Done!')
 	}
 }
@@ -204,15 +204,15 @@ fn handle_sigint(_ os.Signal) {
 		average_time += t
 	}
 
-  if times.len != 0 && average_time != 0 {
-    average_time /= times.len
-  }
+	if times.len != 0 && average_time != 0 {
+		average_time /= times.len
+	}
 
-  if cr {
-	  println('\nAverage request time: ${average_time} ms')
-  } else {
-    println('\rAverage request time: ${average_time} ms')
-  }
+	if cr {
+		println('\nAverage request time: ${average_time} ms')
+	} else {
+		println('\rAverage request time: ${average_time} ms')
+	}
 	print('Bye!')
 	exit(0)
 }

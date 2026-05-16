@@ -15,6 +15,7 @@ watchcode [flags] <url>
 | `-n` | Number of times to check the URL (default: infinite) |
 | `-r` | Compact single-line output using carriage return |
 | `-d` | Delay(in seconds) inbetween each loop (default: 1) |
+| `-t` | Number of times that the check can error (default: 3) |
 
 ## Examples
 
@@ -39,6 +40,11 @@ watchcode -r https://example.com
 Set the delay manually:
 ```
 watchcode -d 2 https://example.com
+```
+
+Set the acceptable error count manually:
+```
+watchcode -t 2 https://example.com
 ```
 
 ## Build and install

@@ -39,6 +39,20 @@ fn main() {
 		loops = loops_str.int()
 	}
 
+  mut delay := time.second
+  if os.args.contains('-d') {
+		delay_str := os.args[os.args.index('-d') + 1]
+
+		for ch in delay_str {
+			if !is_digit(ch) {
+				eprintln('Invalid loop delay: ${os.args[os.args.index('-d') + 1]}')
+				return
+			}
+		}
+
+		delay = time.second * delay_str.int()
+	}
+
 	if os.args.contains('-r') {
 		cr = true
 	}
@@ -49,11 +63,11 @@ fn main() {
 		if i == 0 { continue
 		 }
 
-		if arg == '-n' || arg == '-r' {
+		if arg == '-n' || arg == '-r' || arg == '-d' {
 			continue
 		}
 
-		if i > 1 && os.args[i - 1] == '-n' {
+		if i > 1 && (os.args[i - 1] == '-n' || os.args[i - 1] == '-d') {
 			continue
 		}
 
@@ -70,8 +84,8 @@ fn main() {
 
 	if loops == 0 {
 		for {
-			if failures == 5 {
-				eprintln('GET request failed five times, exiting...')
+			if failures == 3 {
+				eprintln('GET request failed three times, exiting...')
 				exit(2)
 			}
 
@@ -106,14 +120,14 @@ fn main() {
 
 			// Wait 1 second minus the time it took
 			dprintln(elapsed.str())
-			if elapsed < time.second {
-				time.sleep(time.second - elapsed)
+			if elapsed < delay {
+				time.sleep(delay - elapsed)
 			}
 		}
 	} else {
 		for i := 0; i != loops; i++ {
-			if failures == 5 {
-				eprintln('GET request failed five times, exiting...')
+			if failures == 3 {
+				eprintln('GET request failed three times, exiting...')
 				exit(2)
 			}
 
@@ -148,8 +162,8 @@ fn main() {
 
 			// Wait 1 second minus the time it took
 			dprintln(elapsed.str())
-			if elapsed < time.second {
-				time.sleep(time.second - elapsed)
+			if elapsed < delay {
+				time.sleep(delay - elapsed)
 			}
 		}
 
@@ -159,9 +173,15 @@ fn main() {
 			average_time += t
 		}
 
-		average_time /= times.len
+    if times.len != 0 && average_time != 0 {
+  		average_time /= times.len
+    }
 
-		println('Average request time: ${average_time} ms')
+    if cr {
+      println('\nAverage request time: ${average_time} ms')
+    } else {
+      println('\rAverage request time: ${average_time} ms')
+    }
 		print('Done!')
 	}
 }
@@ -183,12 +203,14 @@ fn handle_sigint(_ os.Signal) {
 		average_time += t
 	}
 
-	average_time /= times.len
+  if times.len != 0 && average_time != 0 {
+    average_time /= times.len
+  }
 
   if cr {
 	  println('\nAverage request time: ${average_time} ms')
   } else {
-    println('\nAverage request time: ${average_time} ms')
+    println('\rAverage request time: ${average_time} ms')
   }
 	print('Bye!')
 	exit(0)

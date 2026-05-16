@@ -14,6 +14,7 @@ watchcode [flags] <url>
 |------|-------------|
 | `-n` | Number of times to check the URL (default: infinite) |
 | `-r` | Compact single-line output using carriage return |
+| `-d` | Delay(in seconds) inbetween each loop (default: 1) |
 
 ## Examples
 
@@ -33,6 +34,11 @@ Compact single-line mode:
 
 ```
 watchcode -r https://example.com
+```
+
+Set the delay manually:
+```
+watchcode -d 2 https://example.com
 ```
 
 ## Build and install

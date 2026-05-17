@@ -37,7 +37,7 @@ fn parse_args(args []string) !Config {
 				cfg.cr = true
 			}
 			'-f' {
-				cfg.format = true
+				cfg.format = false
 			}
 			'-n', '-d', '-t', '-l' {
 				// Ensure next value exists
@@ -49,9 +49,18 @@ fn parse_args(args []string) !Config {
 
 				match arg {
 					'-n' {
+            if !is_str_digit(value) {
+              eprintln('Invalid number: ${value}')
+              exit(1)
+            }
 						cfg.loops = value.int()
 					}
 					'-d' {
+            if !is_str_digit(value) {
+              eprintln('Invalid number: ${value}')
+              exit(1)
+            }
+
 						cfg.delay = value.int()
 
 						if cfg.delay <= 0 {
@@ -59,6 +68,11 @@ fn parse_args(args []string) !Config {
 						}
 					}
 					'-t' {
+            if !is_str_digit(value) {
+              eprintln('Invalid number: ${value}')
+              exit(1)
+            }
+
 						cfg.tries = value.int()
 
 						if cfg.tries <= 0 {
@@ -98,4 +112,15 @@ fn parse_args(args []string) !Config {
 	}
 
 	return cfg
+}
+
+fn is_digit(c u8) bool {
+	return c >= u8(48) && c <= u8(57)
+}
+
+fn is_str_digit(s string) bool {
+  for c in s {
+    if !is_digit(c) { return false }
+  }
+  return true
 }

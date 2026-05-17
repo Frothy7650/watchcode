@@ -16,6 +16,8 @@ watchcode [flags] <url>
 | `-r` | Compact single-line output using carriage return |
 | `-d` | Delay(in seconds) inbetween each loop (default: 1) |
 | `-t` | Number of times that the check can error (default: 3) |
+| `-f` | Disable formatting |
+| `-l` | Log to a file |
 
 ## Examples
 
@@ -47,8 +49,18 @@ Set the acceptable error count manually:
 watchcode -t 2 https://example.com
 ```
 
-## Build and install
+Disable formatting:
+```
+watchcode -f https://example.com
+```
 
+Log to a file:
+```
+watchcode -l watchcode.log https://example.com
+```
+
+## Build and install
+Requires [Vlang](https://github.com/vlang/v) to be installed
 ```sh
 ./make.vsh install
 ```

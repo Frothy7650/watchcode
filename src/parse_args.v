@@ -2,17 +2,6 @@ module main
 
 import os
 
-struct Config {
-mut:
-	url      string
-	loops    int = -1
-	delay    int = 1
-	tries    int = 3
-	cr       bool
-	format   bool = true
-	log_path string
-}
-
 fn parse_args(args []string) !Config {
 	mut cfg := Config{}
 
@@ -23,7 +12,7 @@ fn parse_args(args []string) !Config {
 		arg := args[i]
 
 		match arg {
-			'-h', '--help' {
+			'--help' {
 				println("Watches URL's status code")
 				println('\t-n\tcontrol how many times the status code is checked')
 				println('\t-r\tprint all logs on 1 line')
@@ -31,6 +20,7 @@ fn parse_args(args []string) !Config {
 				println('\t-t\tcontrol retry count')
 				println('\t-f\tdisable formatting')
 				println('\t-l\tlog to a file')
+				println('\t-j\toutput JSON instead of text')
 				exit(0)
 			}
 			'-r' {
@@ -38,6 +28,9 @@ fn parse_args(args []string) !Config {
 			}
 			'-f' {
 				cfg.format = false
+			}
+			'-j' {
+				cfg.json = true
 			}
 			'-n', '-d', '-t', '-l' {
 				// Ensure next value exists
@@ -81,7 +74,6 @@ fn parse_args(args []string) !Config {
 					}
 					'-l' {
 						cfg.log_path = os.abs_path(value)
-						persist_stdout_to_disk(cfg.log_path)
 					}
 					else {}
 				}
@@ -107,6 +99,14 @@ fn parse_args(args []string) !Config {
 	}
 
 	if cfg.log_path != '' {
+		if cfg.log_path == '' {
+			cfg.log_path = 'watchcode.log'
+		}
+		cfg.cr = false
+		cfg.format = false
+	}
+
+	if cfg.json {
 		cfg.cr = false
 		cfg.format = false
 	}

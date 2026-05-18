@@ -2,21 +2,41 @@ module main
 
 import frothy7650.chalk
 import net.http
+import arrays
 import time
 import os
 
-__global (
-	times []i64
-	cr    bool
-)
-
 fn main() {
+  // Setup custom sigint handler
 	os.signal_opt(.int, handle_sigint)!
 
+  // Get configuration from args
 	cfg := parse_args(os.args) or {
 		eprintln('Failed to parse args: ${err}')
 		exit(1)
 	}
+
+  // Get output mode
+	mut mode := OutputMode.stdout_plain
+
+	if cfg.json {
+		mode = .stdout_json
+	}
+
+	if cfg.cr && !cfg.json {
+		mode = .stdout_cr
+	}
+
+	if cfg.log_path != '' {
+		if cfg.json {
+			mode = .file_json
+		} else {
+			mode = .file_plain
+		}
+	}
+
+  // Setup logfile if needed
+	if cfg.log_path != '' { setup_logfile(cfg.log_path)! }
 
 	cr = cfg.cr
 
@@ -32,7 +52,8 @@ fn main() {
 		start := time.now()
 
 		// Get status
-		mut status := '${http.get(cfg.url) or {
+    // TODO: Add support for other protocols
+		mut status_code := http.get(cfg.url) or {
 			mut toprint := ''
 			if cfg.format {
 				toprint = chalk.red('GET request failed: ${err}, retrying')
@@ -43,27 +64,14 @@ fn main() {
 			println(toprint)
 			failures++
 			continue
-		}.status_code}'
-
-		// Colourize status
-		if cfg.format {
-			if status == '200' {
-				status = chalk.green(status)
-			} else {
-				status = chalk.red(status)
-			}
-		}
+		}.status_code
 
 		// Get time for request
 		elapsed := time.since(start)
 		times << elapsed.milliseconds()
 
 		// Print url, time, and status
-		if cr {
-			print('\r${i + 1}. ${cfg.url} at ${time.now().custom_format('HH:mm:ss')}: ${status}, GET request took ${elapsed.str()}')
-		} else {
-			println('${i + 1}. ${cfg.url} at ${time.now().custom_format('HH:mm:ss')}: ${status}, GET request took ${elapsed.str()}')
-		}
+		log(i, status_code, elapsed, cfg, mode)
 
 		delay := time.second * cfg.delay
 		// Wait 1 second minus the time it took
@@ -72,31 +80,40 @@ fn main() {
 		}
 	}
 
-	print_averages(times)
+	print_summary(times)!
 	print('Done!')
 }
 
 fn handle_sigint(_ os.Signal) {
 	// NOTE: If there are weird panics, it might be here
-	print_averages(times)
+	print_summary(times) or { panic(err) }
 	print('Bye!')
 	exit(0)
 }
 
-fn print_averages(times []i64) {
-	mut average_time := i64(0)
+fn print_summary(times []i64) ! {
+  if !cr && logfile.is_opened {
+    // Overwrite the current line after Ctrl+C
+    println('\r-- Summary --')
+  } else {
+    // Normal newline behavior
+    println('\n-- Summary --')
+  }
 
-	for t in times {
-		average_time += t
-	}
+  if times.len != 0 {
+    println('No requests recorded.')
+    return
+  }
 
-	if times.len != 0 && average_time != 0 {
-		average_time /= times.len
-	}
+  mut average_time := i64(0)
 
-	if !cr {
-		println('\nAverage request time: ${average_time} ms')
-	} else {
-		println('\n\rAverage request time: ${average_time} ms')
-	}
+  for t in times {
+    average_time += t
+  }
+
+  average_time /= times.len
+
+  println('Average request time: ${average_time} ms')
+  println('Highest request time: ${arrays.max(times)!} ms')
+  println('Lowest request time: ${arrays.min(times)!} ms')
 }

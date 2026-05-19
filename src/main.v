@@ -7,19 +7,19 @@ import time
 import os
 
 fn main() {
-  // Setup custom sigint handler
+	// Setup custom sigint handler
 	os.signal_opt(.int, handle_sigint) or {
-    eprintln('Failed to change SIGINT handler: ${err}')
-    exit(1)
-  }
+		eprintln('Failed to change SIGINT handler: ${err}')
+		exit(1)
+	}
 
-  // Get configuration from args
+	// Get configuration from args
 	cfg := parse_args(os.args) or {
 		eprintln('Failed to parse args: ${err}')
 		exit(2)
 	}
 
-  // Get output mode
+	// Get output mode
 	mut mode := OutputMode.stdout_plain
 
 	if cfg.json {
@@ -38,13 +38,13 @@ fn main() {
 		}
 	}
 
-  // Setup logfile if needed
+	// Setup logfile if needed
 	if cfg.log_path != '' {
-    setup_logfile(cfg.log_path) or {
-      eprintln('Failed to setup logfile: ${err}')
-      exit(3)
-    }
-  }
+		setup_logfile(cfg.log_path) or {
+			eprintln('Failed to setup logfile: ${err}')
+			exit(3)
+		}
+	}
 
 	cr = cfg.cr
 
@@ -53,14 +53,14 @@ fn main() {
 	for i := 0; i != cfg.loops; i++ {
 		if failures == cfg.tries {
 			eprintln('GET request failed ${cfg.tries} times, exiting...')
-      exit(4)
+			exit(4)
 		}
 
 		// Capture loop start time
 		start := time.now()
 
 		// Get status
-    // TODO: Add support for other protocols
+		// TODO: Add support for other protocols
 		mut status_code := http.get(cfg.url) or {
 			mut toprint := ''
 			if cfg.format {
@@ -89,9 +89,9 @@ fn main() {
 	}
 
 	print_summary(times) or {
-    eprintln('Failed to print summary: ${err}')
-    exit(6)
-  }
+		eprintln('Failed to print summary: ${err}')
+		exit(6)
+	}
 	print('Done!')
 }
 
@@ -103,28 +103,32 @@ fn handle_sigint(_ os.Signal) {
 }
 
 fn print_summary(times []i64) ! {
-  if !cr && logfile.is_opened {
-    // Overwrite the current line after Ctrl+C
-    println('\r-- Summary --')
-  } else {
-    // Normal newline behavior
-    println('\n-- Summary --')
-  }
+	if !cr && logfile.is_opened {
+		// Overwrite the current line after Ctrl+C
+		println('\r-- Summary --')
+	} else {
+		// Normal newline behavior
+		println('\n-- Summary --')
+	}
 
-  if times.len == 0 {
-    println('No requests recorded.')
-    return
-  }
+	if times.len == 0 {
+		println('No requests recorded.')
+		return
+	}
 
-  mut average_time := i64(0)
+	mut average_time := i64(0)
 
-  for t in times {
-    average_time += t
-  }
+	for t in times {
+		average_time += t
+	}
 
-  average_time /= times.len
+	average_time /= times.len
 
-  println('Average request time: ${average_time} ms')
-  println('Highest request time: ${arrays.max(times) or { return error('Failed to get largest in array: ${err}') }} ms')
-  println('Lowest request time: ${arrays.min(times) or { return error('Failed to get smallest in array: ${err}') }} ms')
+	println('Average request time: ${average_time} ms')
+	println('Highest request time: ${arrays.max(times) or {
+		return error('Failed to get largest in array: ${err}')
+	}} ms')
+	println('Lowest request time: ${arrays.min(times) or {
+		return error('Failed to get smallest in array: ${err}')
+	}} ms')
 }

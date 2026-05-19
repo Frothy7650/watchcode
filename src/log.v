@@ -6,7 +6,7 @@ import json
 import os
 
 fn log(i int, status_code int, elapsed time.Duration, cfg Config, mode OutputMode) {
-  status_text, is_error_status := get_status_text(status_code)
+	status_text, is_error_status := get_status_text(status_code)
 	ts := time.now().custom_format('HH:mm:ss')
 	json_data := JsonLog{
 		i:           i
@@ -30,7 +30,7 @@ fn log(i int, status_code int, elapsed time.Duration, cfg Config, mode OutputMod
 		}
 	}
 
-  log := '${i + 1}. ${cfg.url} at ${json_data.timestamp}: ${status_str} ${text_status}, GET request took ${elapsed.str()}'
+	log := '${i + 1}. ${cfg.url} at ${json_data.timestamp}: ${status_str} ${text_status}, GET request took ${elapsed.str()}'
 
 	match mode {
 		.stdout_json {
@@ -65,19 +65,15 @@ enum OutputMode {
 }
 
 fn setup_logfile(path string) ! {
-  if os.exists(path) {
-    os.rm(path) or {
-      return error('Failed to remove ${path}: ${err}')
-    }
-  }
+	if os.exists(path) {
+		os.rm(path) or { return error('Failed to remove ${path}: ${err}') }
+	}
 
-  os.create(path) or {
-    return error('Failed to create ${path}: ${err}')
-  }
+	os.create(path) or { return error('Failed to create ${path}: ${err}') }
 
 	logfile = os.open_append(path) or {
-    return error('Failed to open ${path} in append mode: ${err}')
-  }
+		return error('Failed to open ${path} in append mode: ${err}')
+	}
 }
 
 fn get_status_text(status_code int) (string, bool) {
@@ -88,5 +84,5 @@ fn get_status_text(status_code int) (string, bool) {
 		else { return 'UNKNOWN', false }
 	}
 
-  panic('Well this should never happen')
+	panic('Well this should never happen')
 }

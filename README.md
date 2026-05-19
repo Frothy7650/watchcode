@@ -18,6 +18,7 @@ watchcode [flags] <url>
 | `-t` | Number of times that the check can error (default: 3) |
 | `-f` | Disable formatting |
 | `-l` | Log to a file |
+| `-j` | Output JSON instead of plain text |
 
 ## Examples
 
@@ -57,6 +58,11 @@ watchcode -f https://example.com
 Log to a file:
 ```
 watchcode -l watchcode.log https://example.com
+```
+
+Output JSON:
+```
+watchcode -j https://example.com
 ```
 
 ## Build and install

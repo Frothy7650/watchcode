@@ -58,5 +58,6 @@ fn wait_for_string(target string) ! {
 				return
 			}
 		}
+    time.sleep(time.millisecond * 50)
 	}
 }

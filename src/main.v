@@ -60,7 +60,7 @@ fn main() {
 		start := time.now()
 
 		// Get status
-    mut status := get_status(cfg.url, cfg.scheme, cfg.script_path, cfg.script_log_path) or {
+		mut status := get_status(cfg.url, cfg.scheme, cfg.script_path, cfg.script_log_path) or {
 			mut toprint := ''
 			if cfg.format {
 				toprint = chalk.red('${cfg.scheme} request failed: ${err}, retrying')

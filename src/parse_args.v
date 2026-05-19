@@ -21,8 +21,8 @@ fn parse_args(args []string) !Config {
 				println('\t-f\tdisable formatting')
 				println('\t-l\tlog to a file')
 				println('\t-j\toutput JSON instead of text')
-        println('\t-s\trun commands on connection')
-        println('\t-sl\tlog the output from script')
+				println('\t-s\trun commands on connection')
+				println('\t-sl\tlog the output from script')
 				exit(0)
 			}
 			'-r' {
@@ -77,12 +77,12 @@ fn parse_args(args []string) !Config {
 					'-l' {
 						cfg.log_path = os.abs_path(value)
 					}
-          '-s' {
-            cfg.script_path = os.abs_path(value)
-          }
-          '-sl' {
-            cfg.script_log_path = os.abs_path(value)
-          }
+					'-s' {
+						cfg.script_path = os.abs_path(value)
+					}
+					'-sl' {
+						cfg.script_log_path = os.abs_path(value)
+					}
 					else {}
 				}
 
@@ -91,23 +91,22 @@ fn parse_args(args []string) !Config {
 			}
 			else {
 				// URL
-				if arg.starts_with('http://')
-            || arg.starts_with('https://')
-            || arg.starts_with('tcp://')
-        {
+				if arg.starts_with('http://') || arg.starts_with('https://')
+					|| arg.starts_with('tcp://') {
 					cfg.url = arg
-          mut scheme := Scheme.http
-          arg_scheme, _ := arg.split_once(':') or {
-            return error('Error splitting URL: ${err}')
-          }
+					mut scheme := Scheme.http
+					arg_scheme, _ := arg.split_once(':') or {
+						return error('Error splitting URL: ${err}')
+					}
 
-          match arg_scheme {
-            'http' { scheme = .http }
-            'https' { scheme = .http }
-            'tcp' { scheme = .tcp }
-            else { return error('Unknown URL scheme: ${arg_scheme}') }
-          }
-          cfg.scheme = scheme
+					match arg_scheme {
+						'http' { scheme = .http }
+						'https' { scheme = .http }
+						'tcp' { scheme = .tcp }
+						else { return error('Unknown URL scheme: ${arg_scheme}') }
+					}
+
+					cfg.scheme = scheme
 				} else {
 					return error('unknown argument: ${arg}')
 				}
@@ -131,23 +130,23 @@ fn parse_args(args []string) !Config {
 		cfg.format = false
 	}
 
-  if cfg.scheme == .http && cfg.script_path != '' {
-    return error('Cannot use scripts with HTTP/s')
-  }
+	if cfg.scheme == .http && cfg.script_path != '' {
+		return error('Cannot use scripts with HTTP/s')
+	}
 
-  if cfg.script_path != '' {
-    if !os.exists(cfg.script_path) {
-      return error('Script not found at ${cfg.script_path}')
-    }
-  }
+	if cfg.script_path != '' {
+		if !os.exists(cfg.script_path) {
+			return error('Script not found at ${cfg.script_path}')
+		}
+	}
 
-  if cfg.script_path == '' && cfg.script_log_path != '' {
-    return error('Cannot log script output without a script')
-  }
+	if cfg.script_path == '' && cfg.script_log_path != '' {
+		return error('Cannot log script output without a script')
+	}
 
-  if cfg.script_path != '' && cfg.script_log_path == '' {
-    return error('Please provide a script log path with -sl')
-  }
+	if cfg.script_path != '' && cfg.script_log_path == '' {
+		return error('Please provide a script log path with -sl')
+	}
 
 	return cfg
 }

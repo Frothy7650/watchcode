@@ -19,6 +19,8 @@ watchcode [flags] <url>
 | `-f` | Disable formatting |
 | `-l` | Log to a file |
 | `-j` | Output JSON instead of plain text |
+| `-s` | Run a script(requires -sl) on connection |
+| `-sl` | Log the output of a TCP connection when using scripts |
 
 ## Examples
 
@@ -65,6 +67,29 @@ Output JSON:
 watchcode -j https://example.com
 ```
 
+Run a script and log it:
+```
+watchcode -s script.wts -sl output.log tcp://example.com:80
+```
+
+## Scripts
+Scripts will execute line by line, they send each line to the server, and log the responses with the `-sl` flag.
+### Special commands
+| command | behaviour |
+|---------|-----------|
+| `sleep <SEC>` | Sleeps for \<SEC\> seconds |
+| `wait <TARGET>` | Waits until server sends a message containing \<TARGET\> |
+
+### Example script
+This script gets a HTTP response from example.com
+```
+GET / HTTP/1.1
+Host: example.com
+Connection: close
+
+```
+And yes, that last newline is necessary, it's equivalent to sending enter twice.
+
 ## Build and install
 Requires [Vlang](https://github.com/vlang/v) to be installed
 ```sh
@@ -81,3 +106,4 @@ Requires [Vlang](https://github.com/vlang/v) to be installed
 | 5 | Failed to write to file |
 | 6 | Failed to print summary(should basically never happen) |
 | 7 | Invalid number in arguments |
+| 8 | TCP connection close failure |

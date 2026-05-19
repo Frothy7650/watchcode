@@ -5,20 +5,19 @@ import time
 import json
 import os
 
-fn log(i int, status_code int, elapsed time.Duration, cfg Config, mode OutputMode) {
-	status_text, is_error_status := get_status_text(status_code)
+fn log(i int, status string, elapsed time.Duration, cfg Config, mode OutputMode) {
+	mut text_status, is_error_status := get_status_text(status, cfg.scheme)
 	ts := time.now().custom_format('HH:mm:ss')
 	json_data := JsonLog{
 		i:           i
 		url:         cfg.url
+    scheme:      cfg.scheme
 		timestamp:   ts
-		status_code: status_code
-		status_text: status_text
+		status:      status
 		elapsed:     elapsed
 	}
 
-	mut status_str := '${status_code}'
-	mut text_status := status_text
+	mut status_str := '${status}'
 
 	if cfg.format {
 		if is_error_status {
@@ -30,7 +29,7 @@ fn log(i int, status_code int, elapsed time.Duration, cfg Config, mode OutputMod
 		}
 	}
 
-	log := '${i + 1}. ${cfg.url} at ${json_data.timestamp}: ${status_str} ${text_status}, GET request took ${elapsed.str()}'
+	log := '${i + 1}. ${cfg.url} at ${json_data.timestamp}: ${if cfg.scheme == .http { status_str } else { '\b' }} ${text_status}, ${cfg.scheme} took ${elapsed.str()}'
 
 	match mode {
 		.stdout_json {
@@ -76,13 +75,24 @@ fn setup_logfile(path string) ! {
 	}
 }
 
-fn get_status_text(status_code int) (string, bool) {
-	match status_code {
-		200 { return 'OK', false }
-		404 { return 'FILE NOT FOUND', true }
-		502 { return 'INTERNAL SERVER ERROR', true }
-		else { return 'UNKNOWN', false }
-	}
+fn get_status_text(status_code string, scheme Scheme) (string, bool) {
+  match scheme {
+    .http {
+      match status_code {
+        '200' { return 'OK', false }
+        '404' { return 'FILE NOT FOUND', true }
+        '502' { return 'INTERNAL SERVER ERROR', true }
+        else { return 'UNKNOWN', false }
+      }
+    }
+    .tcp {
+      match status_code {
+        'online' { return 'ONLINE', false }
+        'conn refused' { return 'CONNECTION REFUSED', true }
+        else { return 'UNKNOWN: ${status_code}', true }
+      }
+    }
+  }
 
 	panic('Well this should never happen')
 }

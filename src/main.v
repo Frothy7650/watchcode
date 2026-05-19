@@ -1,7 +1,7 @@
 module main
 
 import frothy7650.chalk
-import net.http
+import net.http as _
 import arrays
 import time
 import os
@@ -52,7 +52,7 @@ fn main() {
 
 	for i := 0; i != cfg.loops; i++ {
 		if failures == cfg.tries {
-			eprintln('GET request failed ${cfg.tries} times, exiting...')
+			eprintln('${cfg.scheme} request failed ${cfg.tries} times, exiting...')
 			exit(4)
 		}
 
@@ -60,26 +60,25 @@ fn main() {
 		start := time.now()
 
 		// Get status
-		// TODO: Add support for other protocols
-		mut status_code := http.get(cfg.url) or {
+    mut status := get_status(cfg.url, cfg.scheme, cfg.script_path, cfg.script_log_path) or {
 			mut toprint := ''
 			if cfg.format {
-				toprint = chalk.red('GET request failed: ${err}, retrying')
+				toprint = chalk.red('${cfg.scheme} request failed: ${err}, retrying')
 			} else {
-				toprint = 'GET request failed: ${err}, retrying'
+				toprint = '${cfg.scheme} request failed: ${err}, retrying'
 			}
 
 			println(toprint)
 			failures++
 			continue
-		}.status_code
+		}
 
 		// Get time for request
 		elapsed := time.since(start)
 		times << elapsed.milliseconds()
 
 		// Print url, time, and status
-		log(i, status_code, elapsed, cfg, mode)
+		log(i, status, elapsed, cfg, mode)
 
 		delay := time.second * cfg.delay
 		// Wait 1 second minus the time it took

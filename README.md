@@ -79,6 +79,7 @@ Scripts will execute line by line, they send each line to the server, and log th
 |---------|-----------|
 | `sleep <SEC>` | Sleeps for \<SEC\> seconds |
 | `wait <TARGET>` | Waits until server sends a message containing \<TARGET\> |
+| `quit <TARGET>` | Quits when the server sends a message containing \<TARGET\> |
 
 ### Example script
 This script gets a HTTP response from example.com
@@ -88,7 +89,20 @@ Host: example.com
 Connection: close
 
 ```
-And yes, that last newline is necessary, it's equivalent to sending enter twice.
+And yes, that last newline is necessary, it's equivalent to sending enter twice(HTTP is weird).
+
+Another example, joining a channel in an IRC server and sending messages
+```
+NICK checker
+USER checker 0 * :A bot
+JOIN #checker
+PRIVMSG #checker :Hello!
+PRIVMSG #checker :Just checking that the server is still up
+PRIVMSG #checker :Goodbye!
+PING irc.frothy7650.org
+quit PONG
+```
+we have the PING and PONG commands to make sure that the server received the messages correctly, and responds properly.
 
 ## Build and install
 Requires [Vlang](https://github.com/vlang/v) to be installed

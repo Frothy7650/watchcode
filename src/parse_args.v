@@ -44,14 +44,14 @@ fn parse_args(args []string) !Config {
 					'-n' {
 						if !is_str_digit(value) {
 							eprintln('Invalid number: ${value}')
-							exit(1)
+							exit(7)
 						}
 						cfg.loops = value.int()
 					}
 					'-d' {
 						if !is_str_digit(value) {
 							eprintln('Invalid number: ${value}')
-							exit(1)
+							exit(7)
 						}
 
 						cfg.delay = value.int()
@@ -63,7 +63,7 @@ fn parse_args(args []string) !Config {
 					'-t' {
 						if !is_str_digit(value) {
 							eprintln('Invalid number: ${value}')
-							exit(1)
+							exit(7)
 						}
 
 						cfg.tries = value.int()
@@ -99,9 +99,6 @@ fn parse_args(args []string) !Config {
 	}
 
 	if cfg.log_path != '' {
-		if cfg.log_path == '' {
-			cfg.log_path = 'watchcode.log'
-		}
 		cfg.cr = false
 		cfg.format = false
 	}

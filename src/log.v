@@ -49,7 +49,7 @@ fn log(i int, status_code int, elapsed time.Duration, cfg Config, mode OutputMod
 		.file_plain {
 			logfile.writeln(log) or {
 				eprintln('Failed to write to file: ${err}')
-				exit(4)
+				exit(5)
 			}
 			logfile.flush()
 		}
@@ -66,12 +66,18 @@ enum OutputMode {
 
 fn setup_logfile(path string) ! {
   if os.exists(path) {
-    os.rm(path)!
+    os.rm(path) or {
+      return error('Failed to remove ${path}: ${err}')
+    }
   }
 
-  os.create(path)!
+  os.create(path) or {
+    return error('Failed to create ${path}: ${err}')
+  }
 
-	logfile = os.open_append(path)!
+	logfile = os.open_append(path) or {
+    return error('Failed to open ${path} in append mode: ${err}')
+  }
 }
 
 fn get_status_text(status_code int) (string, bool) {
@@ -82,5 +88,5 @@ fn get_status_text(status_code int) (string, bool) {
 		else { return 'UNKNOWN', false }
 	}
 
-	return 'UNKONWN', false
+  panic('Well this should never happen')
 }

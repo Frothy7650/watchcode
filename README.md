@@ -64,3 +64,14 @@ Requires [Vlang](https://github.com/vlang/v) to be installed
 ```sh
 ./make.vsh install
 ```
+
+## Errors
+| code | error |
+|------|-------|
+| 1 | Failed to change SIGINT handler |
+| 2 | Failed to parse arguments correctly |
+| 3 | Failed to create/clear logfile |
+| 4 | GET request failed too many times |
+| 5 | Failed to write to file |
+| 6 | Failed to print summary(should basically never happen) |
+| 7 | Invalid number in arguments |

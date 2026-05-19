@@ -10,12 +10,14 @@ fn run_script(mut conn net.TcpConn, script_path string, script_log_path string) 
 	scriptlogfile = os.open_append(script_log_path)!
 	is_conn = true
 
-	go fn [mut conn, script_log_path] () {
+		go fn [mut conn, script_log_path] () {
 		for {
 			if !is_conn { break
 			 }
 			line := conn.read_line()
+			lines_mutex.lock()
 			lines << line
+			lines_mutex.unlock()
 			if script_log_path != '' {
 				scriptlogfile.write_string(line.replace('\r', '')) or {
 					eprintln('Failed to write to file: ${err}')
@@ -52,12 +54,15 @@ fn run_script(mut conn net.TcpConn, script_path string, script_log_path string) 
 
 fn wait_for_string(target string) ! {
 	for {
+		lines_mutex.lock()
 		for line in lines {
 			if line.contains(target) {
+				lines_mutex.unlock()
 				println('Found ${target}')
 				return
 			}
 		}
+		lines_mutex.unlock()
     time.sleep(time.millisecond * 50)
 	}
 }

@@ -1,6 +1,7 @@
 # watchcode
 
-Periodically checks a URL's HTTP status code and logs the response.
+Periodically checks a server's status and logs the response.
+Supports TCP and HTTP/s
 
 ## Usage
 

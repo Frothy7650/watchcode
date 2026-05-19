@@ -10,7 +10,7 @@ fn run_script(mut conn net.TcpConn, script_path string, script_log_path string) 
 	scriptlogfile = os.open_append(script_log_path)!
 	is_conn = true
 
-		go fn [mut conn, script_log_path] () {
+	go fn [mut conn, script_log_path] () {
 		for {
 			if !is_conn { break
 			 }
@@ -63,6 +63,6 @@ fn wait_for_string(target string) ! {
 			}
 		}
 		lines_mutex.unlock()
-    time.sleep(time.millisecond * 50)
+		time.sleep(time.millisecond * 50)
 	}
 }

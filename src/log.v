@@ -29,15 +29,15 @@ fn log(i int, status string, elapsed time.Duration, cfg Config, mode OutputMode)
 		}
 	}
 
-	log := '${i + 1}. ${cfg.url} at ${json_data.timestamp}: ${if cfg.scheme == .http {
-		status_str
+	log := '${i + 1}. ${cfg.url} at ${json_data.timestamp}:${if cfg.scheme == .http {
+		' ' + status_str
 	} else {
-		'\b'
+		''
 	}} ${text_status}, ${cfg.scheme} took ${elapsed.str()}'
 
 	match mode {
 		.stdout_json {
-			println(json.encode(json_data))
+			log_normal(json.encode(json_data)) or {}
 		}
 		.file_json {
 			logfile.writeln(json.encode(json_data)) or { eprintln(err) }
@@ -47,7 +47,7 @@ fn log(i int, status string, elapsed time.Duration, cfg Config, mode OutputMode)
 			print('\r${log}')
 		}
 		.stdout_plain {
-			println(log)
+			log_normal(log) or {}
 		}
 		.file_plain {
 			logfile.writeln(log) or {
@@ -77,6 +77,7 @@ fn setup_logfile(path string) ! {
 	logfile = os.open_append(path) or {
 		return error('Failed to open ${path} in append mode: ${err}')
 	}
+	is_logging = true
 }
 
 fn get_status_text(status_code string, scheme Scheme) (string, bool) {
@@ -96,7 +97,22 @@ fn get_status_text(status_code string, scheme Scheme) (string, bool) {
 				else { return 'UNKNOWN: ${status_code}', true }
 			}
 		}
+		.mc {
+			status_json := json.decode(McStatus, status_code) or {
+				panic('Internal error, failed to decode mc status into JSON: ${err}')
+			}
+			return '${status_json.players.online}/${status_json.players.max} players, version ${status_json.version.name}', false
+		}
 	}
 
 	panic('Well this should never happen')
+}
+
+fn log_normal(s string) ! {
+	if is_logging {
+		logfile.writeln(s)!
+		logfile.flush()
+	} else {
+		println(s)
+	}
 }

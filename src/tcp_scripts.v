@@ -5,12 +5,18 @@ import net
 import os
 
 fn run_script(mut conn net.TcpConn, script_path string, script_log_path string) ! {
-	println('running ${script_path}...')
+	lines.clear()
+	log_normal('running ${script_path}...')!
 	script := os.read_file(script_path)!.split_into_lines()
-	scriptlogfile = os.open_append(script_log_path)!
+
+	if script_log_path != '' {
+		scriptlogfile = os.open_append(script_log_path)!
+		is_logging = true
+	}
+
 	is_conn = true
 
-	go fn [mut conn, script_log_path] () {
+	go fn [mut conn] () {
 		for {
 			if !is_conn { break
 			 }
@@ -18,12 +24,14 @@ fn run_script(mut conn net.TcpConn, script_path string, script_log_path string) 
 			lines_mutex.lock()
 			lines << line
 			lines_mutex.unlock()
-			if script_log_path != '' {
+			if is_logging {
 				scriptlogfile.write_string(line.replace('\r', '')) or {
 					eprintln('Failed to write to file: ${err}')
 					exit(5)
 				}
 				scriptlogfile.flush()
+			} else {
+				print(line.replace('\r', ''))
 			}
 		}
 	}()
@@ -46,9 +54,8 @@ fn run_script(mut conn net.TcpConn, script_path string, script_log_path string) 
 			return
 		}
 		conn.write_string(cmd + '\r\n')!
-		println(cmd)
 	}
-	println('${script_path} done!')
+	log_normal('${script_path} done!')!
 	time.sleep(time.second)
 }
 
@@ -58,7 +65,7 @@ fn wait_for_string(target string) ! {
 		for line in lines {
 			if line.contains(target) {
 				lines_mutex.unlock()
-				println('Found ${target}')
+				if scriptlogfile.is_opened { scriptlogfile.write_string('Found ${target}') or {} }
 				return
 			}
 		}

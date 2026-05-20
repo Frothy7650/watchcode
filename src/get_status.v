@@ -7,6 +7,7 @@ fn get_status(url string, scheme Scheme, script_path string, script_log_path str
 	match scheme {
 		.http { return http.get(url)!.status_code.str() }
 		.tcp { return check_port(url, script_path, script_log_path)! }
+		.mc { return check_mc_server(url)! }
 	}
 
 	panic('Once again, this should never happen')
@@ -23,7 +24,7 @@ fn check_port(url_with_scheme string, script_path string, script_log_path string
 
 	if script_path != '' {
 		run_script(mut conn, script_path, script_log_path)!
-		scriptlogfile.close()
+		if scriptlogfile.is_opened { scriptlogfile.close() }
 	}
 
 	conn.close() or {

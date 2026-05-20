@@ -26,7 +26,25 @@ mut:
 	script_log_path string
 }
 
+struct McStatus {
+	description          string
+	players              Players
+	version              Version
+	enforces_secure_chat bool @[json: enforcesSecureChat]
+}
+
+struct Players {
+	max    int
+	online int
+}
+
+struct Version {
+	name     string
+	protocol int
+}
+
 enum Scheme {
 	http
 	tcp
+	mc
 }

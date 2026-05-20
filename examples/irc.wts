@@ -1,0 +1,8 @@
+NICK bot
+USER bot 0 * :A bot
+JOIN #checker
+PRIVMSG #checker :Hello!
+PRIVMSG #checker :Just checking that the server is still up
+PRIVMSG #checker :Goodbye!
+PING irc.frothy7650.org
+quit PONG

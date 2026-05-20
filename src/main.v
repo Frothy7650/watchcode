@@ -68,7 +68,7 @@ fn main() {
 				toprint = '${cfg.scheme} request failed: ${err}, retrying'
 			}
 
-			println(toprint)
+			log_normal(toprint) or {}
 			failures++
 			continue
 		}
@@ -104,14 +104,14 @@ fn handle_sigint(_ os.Signal) {
 fn print_summary(times []i64) ! {
 	if !cr && logfile.is_opened {
 		// Overwrite the current line after Ctrl+C
-		println('\r-- Summary --')
+		log_normal('-- Summary --')!
 	} else {
 		// Normal newline behavior
-		println('\n-- Summary --')
+		log_normal('\n-- Summary --')!
 	}
 
 	if times.len == 0 {
-		println('No requests recorded.')
+		log_normal('No requests recorded.')!
 		return
 	}
 
@@ -123,11 +123,11 @@ fn print_summary(times []i64) ! {
 
 	average_time /= times.len
 
-	println('Average request time: ${average_time} ms')
-	println('Highest request time: ${arrays.max(times) or {
+	log_normal('Average request time: ${average_time} ms')!
+	log_normal('Highest request time: ${arrays.max(times) or {
 		return error('Failed to get largest in array: ${err}')
-	}} ms')
-	println('Lowest request time: ${arrays.min(times) or {
+	}} ms')!
+	log_normal('Lowest request time: ${arrays.min(times) or {
 		return error('Failed to get smallest in array: ${err}')
-	}} ms')
+	}} ms')!
 }

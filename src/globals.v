@@ -8,6 +8,7 @@ __global (
 	cr            bool
 	logfile       os.File
 	scriptlogfile os.File
+	is_logging    bool
 	lines         []string
 	is_conn       bool
 	lines_mutex   sync.Mutex

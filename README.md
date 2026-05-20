@@ -20,7 +20,7 @@ watchcode [flags] <url>
 | `-f` | Disable formatting |
 | `-l` | Log to a file |
 | `-j` | Output JSON instead of plain text |
-| `-s` | Run a script(requires -sl) on connection |
+| `-s` | Run a script on connection |
 | `-sl` | Log the output of a TCP connection when using scripts |
 
 ## Examples

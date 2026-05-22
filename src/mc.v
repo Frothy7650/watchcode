@@ -107,11 +107,11 @@ fn check_mc_server(url_with_scheme string) !string {
 	json_len := read_varint(mut conn)!
 
 	mut buf := []u8{len: json_len}
-  mut total := 0
-  for total < json_len {
-    n := conn.read(mut buf[total..])!
-    total += n
-  }
+	mut total := 0
+	for total < json_len {
+		n := conn.read(mut buf[total..])!
+		total += n
+	}
 
 	conn.close()!
 

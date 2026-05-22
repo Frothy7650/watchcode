@@ -58,8 +58,8 @@ fn parse_args(args []string) !Config {
 
 						cfg.delay = value.int()
 
-						if cfg.delay <= 0 {
-							cfg.delay = 1
+						if cfg.delay < 0 {
+							cfg.delay = 0
 						}
 					}
 					'-t' {

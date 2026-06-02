@@ -60,7 +60,7 @@ fn main() {
 		start := time.now()
 
 		// Get status
-		mut status := get_status(cfg.url, cfg.scheme, cfg.script_path, cfg.script_log_path) or {
+		mut status, body := get_status(cfg.url, cfg.scheme, cfg.script_path, cfg.script_log_path) or {
 			mut toprint := ''
 			if cfg.format {
 				toprint = chalk.red('${cfg.scheme} request failed: ${err}, retrying')
@@ -72,6 +72,12 @@ fn main() {
 			failures++
 			continue
 		}
+
+    if cfg.print_body && body != none {
+      log_normal('>>> start') or {}
+      log_normal(body) or {}
+      log_normal('>>> end') or {}
+    }
 
 		// Get time for request
 		elapsed := time.since(start)

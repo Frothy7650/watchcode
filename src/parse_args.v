@@ -23,11 +23,15 @@ fn parse_args(args []string) !Config {
 				log_normal('\t-j\toutput JSON instead of text') or {}
 				log_normal('\t-s\trun commands on connection') or {}
 				log_normal('\t-sl\tlog the output from script') or {}
+        log_normal('\t-p\tprint the HTTP/s request body') or {}
 				exit(0)
 			}
 			'-r' {
 				cfg.cr = true
 			}
+      '-p' {
+        cfg.print_body = true
+      }
 			'-f' {
 				cfg.format = false
 			}

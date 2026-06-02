@@ -24,6 +24,7 @@ mut:
 	log_path        string
 	script_path     string
 	script_log_path string
+  print_body      bool
 }
 
 struct McStatus {

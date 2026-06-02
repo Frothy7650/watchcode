@@ -3,11 +3,14 @@ module main
 import net.http
 import net
 
-fn get_status(url string, scheme Scheme, script_path string, script_log_path string) !string {
+fn get_status(url string, scheme Scheme, script_path string, script_log_path string) !(string, ?string) {
 	match scheme {
-		.http { return http.get(url)!.status_code.str() }
-		.tcp { return check_port(url, script_path, script_log_path)! }
-		.mc { return check_mc_server(url)! }
+		.http {
+      req := http.get(url)!
+      return req.status_code.str(), req.body
+    }
+		.tcp { return check_port(url, script_path, script_log_path)!, none }
+		.mc { return check_mc_server(url)!, none }
 	}
 
 	panic('Once again, this should never happen')

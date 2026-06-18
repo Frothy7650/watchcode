@@ -12,14 +12,14 @@ mut:
 
 struct Config {
 mut:
-	url         string
-	scheme      status.Scheme
-	loops       int  = -1
-	delay       int  = 1
-	tries       int  = 3
-	format      bool = true
-	log_path    string
-	script_path   string
-	print_body    bool
-  print_script  bool
+	url          string
+	scheme       status.Scheme
+	loops        int  = -1
+	delay        int  = 1
+	tries        int  = 3
+	format       bool = true
+	log_path     string
+	script_path  string
+	print_body   bool
+	print_script bool
 }

@@ -23,7 +23,7 @@ fn parse_args(args []string) !Config {
 				eprintln('\t-l\tlog to a file')
 				eprintln('\t-s\trun commands on connection')
 				eprintln('\t-p\toutput the HTTP/s request body')
-        eprintln('\t-ps\tprint script output')
+				eprintln('\t-ps\tprint script output')
 				exit(0)
 			}
 			'-p' {
@@ -32,9 +32,9 @@ fn parse_args(args []string) !Config {
 			'-f' {
 				cfg.format = false
 			}
-      '-ps' {
-        cfg.print_script = true
-      }
+			'-ps' {
+				cfg.print_script = true
+			}
 			'-n', '-d', '-t', '-l', '-s' {
 				// Ensure next value exists
 				if i + 1 >= args.len {
@@ -133,9 +133,9 @@ fn parse_args(args []string) !Config {
 		}
 	}
 
-  if cfg.format && cfg.log_path != '' {
-    cfg.format = false
-  }
+	if cfg.format && cfg.log_path != '' {
+		cfg.format = false
+	}
 
 	return cfg
 }

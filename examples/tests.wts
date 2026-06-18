@@ -1,0 +1,18 @@
+# This is a comment (it gets sent to the connection, but servers ignore # lines)
+# The script supports: sleep, wait for, quit on, if, and raw lines
+# --- Raw commands ---
+# Any line that isn't a control command is sent verbatim to the connection
+GET / HTTP/1.1
+Host: localhost
+Connection: close
+
+# --- sleep N ---
+# Pause for N seconds before continuing
+sleep 1
+# --- wait for TARGET ---
+# Block until a received line contains TARGET, then continue
+wait for 200 OK
+# --- quit on TARGET ---
+# Block until a received line contains TARGET, then stop the script
+# and return all collected lines as the script output
+quit on </html>

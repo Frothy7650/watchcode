@@ -1,7 +1,9 @@
-module main
+module status
 
 import net
 import encoding.binary
+import json
+import time
 
 fn write_varint(mut buf []u8, value int) {
 	mut v := value
@@ -67,7 +69,7 @@ fn read_varint(mut conn net.TcpConn) !int {
 		conn.read(mut b)!
 		byte := b[0]
 
-		res |= int(byte & 0x7F) << (7 * num)
+		res |= int(u32(byte & 0x7F) << (7 * num))
 		num++
 
 		if (byte & 0x80) == 0 {
@@ -82,8 +84,7 @@ fn read_varint(mut conn net.TcpConn) !int {
 	return res
 }
 
-fn check_mc_server(url_with_scheme string) !string {
-	url := url_with_scheme.replace('mc://', '')
+fn mc(url string) !Status {
 	host := url.before(':')
 	port := if host.len == url.len { 25565 } else { url.after(':').int() }
 
@@ -115,5 +116,34 @@ fn check_mc_server(url_with_scheme string) !string {
 
 	conn.close()!
 
-	return buf.bytestr()
+  status_json := json.decode(McStatus, buf.bytestr()) or {
+    panic('Internal error, failed to decode mc status into JSON: ${err}')
+  }
+
+  ts := time.now().hhmmss()
+
+  status_var := Status{
+    ok: true
+    msg: '${url} at ${ts}: ${status_json.players.online}/${status_json.players.max} players, version ${status_json.version.name}'
+    raw: buf.bytestr()
+  }
+
+  return status_var
+}
+
+struct McStatus {
+	description          string
+	players              Players
+	version              Version
+	enforces_secure_chat bool @[json: enforcesSecureChat]
+}
+
+struct Players {
+	max    int
+	online int
+}
+
+struct Version {
+	name     string
+	protocol int
 }

@@ -1,5 +1,6 @@
 module main
 
+import status
 import os
 
 fn parse_args(args []string) !Config {
@@ -12,33 +13,29 @@ fn parse_args(args []string) !Config {
 		arg := args[i]
 
 		match arg {
+			// TODO: update some of these
 			'--help' {
-				log_normal("Watches URL's status code") or {}
-				log_normal('\t-n\tcontrol how many times the status code is checked') or {}
-				log_normal('\t-r\tprint all logs on 1 line') or {}
-				log_normal('\t-d\tcontrol delay between checks') or {}
-				log_normal('\t-t\tcontrol retry count') or {}
-				log_normal('\t-f\tdisable formatting') or {}
-				log_normal('\t-l\tlog to a file') or {}
-				log_normal('\t-j\toutput JSON instead of text') or {}
-				log_normal('\t-s\trun commands on connection') or {}
-				log_normal('\t-sl\tlog the output from script') or {}
-        log_normal('\t-p\tprint the HTTP/s request body') or {}
+				eprintln("Watches URL's status code")
+				eprintln('\t-n\tcontrol how many times the status code is checked')
+				eprintln('\t-d\tcontrol delay between checks')
+				eprintln('\t-t\tcontrol retry count')
+				eprintln('\t-f\tdisable formatting')
+				eprintln('\t-l\tlog to a file')
+				eprintln('\t-s\trun commands on connection')
+				eprintln('\t-p\toutput the HTTP/s request body')
+        eprintln('\t-ps\tprint script output')
 				exit(0)
 			}
-			'-r' {
-				cfg.cr = true
+			'-p' {
+				cfg.print_body = true
 			}
-      '-p' {
-        cfg.print_body = true
-      }
 			'-f' {
 				cfg.format = false
 			}
-			'-j' {
-				cfg.json = true
-			}
-			'-n', '-d', '-t', '-l', '-s', '-sl' {
+      '-ps' {
+        cfg.print_script = true
+      }
+			'-n', '-d', '-t', '-l', '-s' {
 				// Ensure next value exists
 				if i + 1 >= args.len {
 					return error('missing value after ${arg}')
@@ -84,9 +81,6 @@ fn parse_args(args []string) !Config {
 					'-s' {
 						cfg.script_path = os.abs_path(value)
 					}
-					'-sl' {
-						cfg.script_log_path = os.abs_path(value)
-					}
 					else {}
 				}
 
@@ -97,9 +91,13 @@ fn parse_args(args []string) !Config {
 				// URL
 				if arg.starts_with('http://') || arg.starts_with('https://')
 					|| arg.starts_with('tcp://') || arg.starts_with('mc://') {
-					cfg.url = arg
-					mut scheme := Scheme.http
-					arg_scheme, _ := arg.split_once(':') or {
+					cfg.url = if arg.starts_with('http://') || arg.starts_with('https://') {
+						arg
+					} else {
+						arg.after('://')
+					}
+					mut scheme := status.Scheme.http
+					arg_scheme, _ := arg.split_once('://') or {
 						return error('Error splitting URL: ${err}')
 					}
 
@@ -125,18 +123,8 @@ fn parse_args(args []string) !Config {
 		return error('missing URL')
 	}
 
-	if cfg.log_path != '' {
-		cfg.cr = false
-		cfg.format = false
-	}
-
-	if cfg.json {
-		cfg.cr = false
-		cfg.format = false
-	}
-
 	if cfg.scheme == .http && cfg.script_path != '' {
-		return error('Cannot use scripts with HTTP/s')
+		return error('Cannot use scripts with HTTP/s, use TCP instead')
 	}
 
 	if cfg.script_path != '' {
@@ -145,9 +133,9 @@ fn parse_args(args []string) !Config {
 		}
 	}
 
-	if cfg.script_path == '' && cfg.script_log_path != '' {
-		return error('Cannot log script output without a script')
-	}
+  if cfg.format && cfg.log_path != '' {
+    cfg.format = false
+  }
 
 	return cfg
 }

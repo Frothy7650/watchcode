@@ -1,51 +1,25 @@
 module main
 
-import time
+import status
 
-struct JsonLog {
-	i         int
-	url       string
-	scheme    Scheme
-	timestamp string
-	status    string
-	elapsed   time.Duration
+struct State {
+mut:
+	times    []i64
+	failures int
+	cfg      Config
+	script   ?string
 }
 
 struct Config {
 mut:
-	url             string
-	scheme          Scheme
-	loops           int = -1
-	delay           int = 1
-	tries           int = 3
-	cr              bool
-	format          bool = true
-	json            bool
-	log_path        string
-	script_path     string
-	script_log_path string
-  print_body      bool
-}
-
-struct McStatus {
-	description          string
-	players              Players
-	version              Version
-	enforces_secure_chat bool @[json: enforcesSecureChat]
-}
-
-struct Players {
-	max    int
-	online int
-}
-
-struct Version {
-	name     string
-	protocol int
-}
-
-enum Scheme {
-	http
-	tcp
-	mc
+	url         string
+	scheme      status.Scheme
+	loops       int  = -1
+	delay       int  = 1
+	tries       int  = 3
+	format      bool = true
+	log_path    string
+	script_path   string
+	print_body    bool
+  print_script  bool
 }

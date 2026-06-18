@@ -1,10 +1,14 @@
 module main
 
 import frothy7650.chalk
-import net.http as _
+import status
 import arrays
 import time
 import os
+
+__global (
+	state State
+)
 
 fn main() {
 	// Setup custom sigint handler
@@ -13,46 +17,31 @@ fn main() {
 		exit(1)
 	}
 
-	// Get configuration from args
-	cfg := parse_args(os.args) or {
-		eprintln('Failed to parse args: ${err}')
-		exit(2)
-	}
-
-	// Get output mode
-	mut mode := OutputMode.stdout_plain
-
-	if cfg.json {
-		mode = .stdout_json
-	}
-
-	if cfg.cr && !cfg.json {
-		mode = .stdout_cr
-	}
-
-	if cfg.log_path != '' {
-		if cfg.json {
-			mode = .file_json
-		} else {
-			mode = .file_plain
+	// Get configuration and state
+	state = State{
+		cfg: parse_args(os.args) or {
+			eprintln('Failed to parse args: ${err}')
+			exit(2)
 		}
 	}
 
-	// Setup logfile if needed
-	if cfg.log_path != '' {
-		setup_logfile(cfg.log_path) or {
-			eprintln('Failed to setup logfile: ${err}')
-			exit(3)
-		}
+	// TODO: get fields for state and config
+
+	state.script = if state.cfg.script_path != '' {
+		os.read_file(state.cfg.script_path)!
+	} else {
+		none
 	}
 
-	cr = cfg.cr
+	if state.cfg.log_path != '' {
+		persist_stderr_to_disk(state.cfg.log_path)
+	} else {
+		redirect_stderr_to_stdout()
+	}
 
-	mut failures := 0
-
-	for i := 0; i != cfg.loops; i++ {
-		if failures == cfg.tries {
-			eprintln('${cfg.scheme} request failed ${cfg.tries} times, exiting...')
+	for i := 0; i != state.cfg.loops; i++ {
+		if state.failures == state.cfg.tries {
+			eprintln('${state.cfg.scheme} request failed ${state.cfg.tries} times, exiting...')
 			exit(4)
 		}
 
@@ -60,80 +49,78 @@ fn main() {
 		start := time.now()
 
 		// Get status
-		mut status, body := get_status(cfg.url, cfg.scheme, cfg.script_path, cfg.script_log_path) or {
+		mut status_var := status.get_status(state.cfg.url, state.cfg.scheme, state.script,
+			state.cfg.format, state.cfg.print_script) or {
 			mut toprint := ''
-			if cfg.format {
-				toprint = chalk.red('${cfg.scheme} request failed: ${err}, retrying')
+			if state.cfg.format {
+				toprint = chalk.red('${state.cfg.scheme} request failed: ${err}, retrying')
 			} else {
-				toprint = '${cfg.scheme} request failed: ${err}, retrying'
+				toprint = '${state.cfg.scheme} request failed: ${err}, retrying'
 			}
 
-			log_normal(toprint) or {}
-			failures++
+			eprintln(toprint)
+			state.failures++
 			continue
 		}
 
-    if cfg.print_body && body != none {
-      log_normal('>>> start') or {}
-      log_normal(body) or {}
-      log_normal('>>> end') or {}
-    }
-
 		// Get time for request
 		elapsed := time.since(start)
-		times << elapsed.milliseconds()
+		state.times << elapsed.milliseconds()
+
+		// Print body if user wants it
+		if state.cfg.print_body && status_var.meta['body'] != '' {
+			eprintln('>>> START')
+			eprintln(status_var.meta['body'])
+			eprintln('>>> END')
+		}
 
 		// Print url, time, and status
-		log(i, status, elapsed, cfg, mode)
+		eprintln('${i + 1}. ${status_var.msg}, ${elapsed}')
 
-		delay := time.second * cfg.delay
+		delay := time.second * state.cfg.delay
 		// Wait 1 second minus the time it took
 		if elapsed < delay {
 			time.sleep(delay - elapsed)
 		}
 	}
 
-	print_summary(times) or {
+	print_summary() or {
 		eprintln('Failed to print summary: ${err}')
 		exit(6)
 	}
+
 	print('Done!')
 }
 
 fn handle_sigint(_ os.Signal) {
 	// NOTE: If there are weird panics, it might be here
-	print_summary(times) or { panic(err) }
-	print('Bye!')
+	print_summary() or { panic(err) }
+	print('done')
 	exit(0)
 }
 
-fn print_summary(times []i64) ! {
-	if !cr && logfile.is_opened {
-		// Overwrite the current line after Ctrl+C
-		log_normal('-- Summary --')!
-	} else {
-		// Normal newline behavior
-		log_normal('\n-- Summary --')!
-	}
+fn print_summary() ! {
+	eprintln('\n-- Summary --')
 
-	if times.len == 0 {
-		log_normal('No requests recorded.')!
+	if state.times.len == 0 {
+		eprintln('No requests recorded.')
 		return
 	}
 
 	mut average_time := i64(0)
 
-	for t in times {
+	for t in state.times {
 		average_time += t
 	}
 
-	average_time /= times.len
+	average_time /= state.times.len
 
-	log_normal('Average request time: ${average_time} ms')!
-	log_normal('Highest request time: ${arrays.max(times) or {
+	eprintln('Average request time: ${average_time} ms')
+	eprintln('Highest request time: ${arrays.max(state.times) or {
 		return error('Failed to get largest in array: ${err}')
-	}} ms')!
-	log_normal('Lowest request time: ${arrays.min(times) or {
+	}} ms')
+
+	eprintln('Lowest request time: ${arrays.min(state.times) or {
 		return error('Failed to get smallest in array: ${err}')
-	}} ms')!
+	}} ms')
 }

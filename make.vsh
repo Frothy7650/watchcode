@@ -10,17 +10,13 @@ mut context := build.context(
 
 context.task(
 	name: 'build'
+  depends: ['get_githash']
 	run:  |self| system('v -enable-globals src/. -o ${app_name}')
 )
 
 context.task(
-  name: 'debug'
-  run:  |self| system('v -g -enable-globals src/. -o ${app_name}')
-)
-
-context.task(
 	name:    'build-prod'
-	depends: ['format']
+	depends: ['get_githash']
 	run:     |self| system('v -cc clang -prod -enable-globals src/. -o ${app_name}')
 )
 
@@ -30,9 +26,14 @@ context.task(
 )
 
 context.task(
-  name:    'install'
-  depends: ['build-prod']
+  name:    'setup'
+  depends: ['get_githash', 'build-prod']
   run:     |self| cp(app_name, join_path(local_bin_dir(), 'watchcode') )!
+)
+
+context.task(
+  name:    'get_githash'
+  run:     |self| system('git log -n 1 --pretty=format:"%h" > .githash')
 )
 
 context.run()

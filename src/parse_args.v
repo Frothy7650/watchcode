@@ -2,6 +2,10 @@ module main
 
 import status
 import os
+import v.vmod
+
+const mod_file_content = $embed_file('v.mod').to_string()
+const commit = $embed_file('.githash').to_string()
 
 fn parse_args(args []string) !Config {
 	mut cfg := Config{}
@@ -21,6 +25,13 @@ fn parse_args(args []string) !Config {
 				eprintln('\t-b\toutput the HTTP/s request body')
 				eprintln('\t-p\tprint script output')
 				eprintln('\t-so\toutput script output to a file')
+				exit(0)
+			}
+			'-v', '--version' {
+				manifest := vmod.decode(mod_file_content) or {
+					panic('failed to parse v.mod: ${err}')
+				}
+				eprintln('version ${manifest.version}, commit #${commit}')
 				exit(0)
 			}
 			'-b' {

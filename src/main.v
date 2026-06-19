@@ -25,8 +25,6 @@ fn main() {
 		}
 	}
 
-	// TODO: get fields for state and config
-
 	state.script = if state.cfg.script_path != '' {
 		os.read_file(state.cfg.script_path)!
 	} else {
@@ -34,10 +32,18 @@ fn main() {
 	}
 
 	if state.cfg.log_path != '' {
-		persist_stderr_to_disk(state.cfg.log_path)
-	} else {
-		redirect_stderr_to_stdout()
-	}
+    persist_stderr_to_disk(state.cfg.log_path)
+    if state.cfg.script_log_path != '' {
+      persist_stdout_to_disk(state.cfg.script_log_path)
+    } else {
+      redirect_stdout_to_stderr()
+    }
+  } else {
+    redirect_stderr_to_stdout()
+    if state.cfg.script_log_path != '' {
+      persist_stdout_to_disk(state.cfg.script_log_path)
+    }
+  }
 
 	for i := 0; i != state.cfg.loops; i++ {
 		if state.failures == state.cfg.tries {
@@ -50,7 +56,7 @@ fn main() {
 
 		// Get status
 		mut status_var := status.get_status(state.cfg.url, state.cfg.scheme, state.script,
-			state.cfg.format, state.cfg.print_script) or {
+			state.cfg.format, state.cfg.print_script_output) or {
 			mut toprint := ''
 			if state.cfg.format {
 				toprint = chalk.red('${state.cfg.scheme} request failed: ${err}, retrying')
@@ -68,7 +74,7 @@ fn main() {
 		state.times << elapsed.milliseconds()
 
 		// Print body if user wants it
-		if state.cfg.print_body && status_var.meta['body'] != '' {
+		if state.cfg.print_http_body && status_var.meta['body'] != '' {
 			eprintln('>>> START')
 			eprintln(status_var.meta['body'])
 			eprintln('>>> END')
@@ -88,8 +94,6 @@ fn main() {
 		eprintln('Failed to print summary: ${err}')
 		exit(6)
 	}
-
-	print('Done!')
 }
 
 fn handle_sigint(_ os.Signal) {

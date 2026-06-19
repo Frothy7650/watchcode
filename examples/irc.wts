@@ -1,8 +1,9 @@
-NICK bot
-USER bot 0 * :A bot
+NICK dwail
+USER dwail 0 * :A bot
+wait for :irc.frothy7650.org 376 dwail :End of MOTD command
 JOIN #checker
 PRIVMSG #checker :Hello!
 PRIVMSG #checker :Just checking that the server is still up
 PRIVMSG #checker :Goodbye!
 PING irc.frothy7650.org
-quit PONG
+quit on :irc.frothy7650.org PONG irc.frothy7650.org :irc.frothy7650.org

@@ -1,4 +1,5 @@
 GET / HTTP/1.1
-Host: localhost
+Host: example.org
 Connection: close
 
+quit on 0

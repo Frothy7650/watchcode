@@ -1,7 +1,7 @@
 # watchcode
 
 Periodically checks a server's status and logs the response.
-Supports TCP and HTTP/s
+Supports HTTP/s, TCP, and Minecraft (SRP).
 
 ## Usage
 
@@ -9,116 +9,93 @@ Supports TCP and HTTP/s
 watchcode [flags] <url>
 ```
 
+URL schemes: `http://`, `https://`, `tcp://`, `mc://`
+
 ## Flags
 
 | Flag | Description |
 |------|-------------|
 | `-n` | Number of times to check the URL (default: infinite) |
-| `-r` | Compact single-line output using carriage return |
-| `-d` | Delay(in seconds) inbetween each loop (default: 1) |
-| `-t` | Number of times that the check can error (default: 3) |
-| `-f` | Disable formatting |
-| `-l` | Log to a file |
-| `-j` | Output JSON instead of plain text |
+| `-d` | Delay in seconds between each loop (default: 1) |
+| `-t` | Number of times the check can fail (default: 3) |
+| `-f` | Disable formatting (ANSI colors) |
+| `-l` | Log stderr output to a file |
 | `-s` | Run a script on connection |
-| `-sl` | Log the output of a TCP connection when using scripts |
+| `-b` | Print HTTP response body |
+| `-p` | Print script output line by line |
+| `-so` | Write script output to a file |
 
 ## Examples
 
-Check a URL 5 times:
-
 ```
-watchcode -n 5 https://example.com
-```
-
-Monitor a URL indefinitely:
-
-```
-watchcode https://example.com
-```
-
-Compact single-line mode:
-
-```
-watchcode -r https://example.com
-```
-
-Set the delay manually:
-```
-watchcode -d 2 https://example.com
-```
-
-Set the acceptable error count manually:
-```
-watchcode -t 2 https://example.com
-```
-
-Disable formatting:
-```
-watchcode -f https://example.com
-```
-
-Log to a file:
-```
+watchcode -n 5 https://example.com       # check 5 times
+watchcode https://example.com             # monitor indefinitely
+watchcode -d 2 https://example.com        # 2s delay between checks
+watchcode -t 2 https://example.com        # exit after 2 failures
+watchcode -f https://example.com          # disable colored output
 watchcode -l watchcode.log https://example.com
-```
-
-Output JSON:
-```
-watchcode -j https://example.com
-```
-
-Run a script and log it:
-```
-watchcode -s script.wts -sl output.log tcp://example.com:80
+watchcode -b https://example.com          # show response body
+watchcode -s script.wts tcp://host:port   # run a script
+watchcode -s script.wts -p tcp://host:port       # print script output
+watchcode -s script.wts -so out.log tcp://host:port  # log script output
+watchcode -s script.wts -l gen.log -so out.log tcp://host:port  # both logs
+watchcode mc://server.example.com          # Minecraft server status
 ```
 
 ## Scripts
-Scripts will execute line by line, they send each line to the server, and log the responses with the `-sl` flag.
-### Special commands
-| command | behaviour |
-|---------|-----------|
-| `sleep <SEC>` | Sleeps for \<SEC\> seconds |
-| `wait <TARGET>` | Waits until server sends a message containing \<TARGET\> |
-| `quit <TARGET>` | Quits when the server sends a message containing \<TARGET\> |
 
-### Example script
-This script gets a HTTP response from example.com
+Scripts execute line by line. Each line that isn't a control command is sent verbatim (with `\r\n`) to the server.
+
+### Control commands
+
+| Command | Behaviour |
+|---------|-----------|
+| `# comment` | Comment line (skipped, not sent) |
+| `sleep <SEC>` | Pause for `<SEC>` seconds |
+| `wait for <TARGET>` | Wait until the server sends a line containing `<TARGET>` |
+| `quit on <TARGET>` | Wait for `<TARGET>`, then stop the script and return collected lines |
+| `if <TARGET> <CODE>` | If any received line contains `<TARGET>`, run `<CODE>` as a sub-script |
+
+Multi-target matching (OR):
+```
+wait for ERROR||TIMEOUT
+quit on 200 OK||301 Moved
+```
+
+### Example — HTTP request
 ```
 GET / HTTP/1.1
 Host: example.com
 Connection: close
 
 ```
-And yes, that last newline is necessary, it's equivalent to sending enter twice(HTTP is weird).
 
-Another example, joining a channel in an IRC server and sending messages
+### Example — IRC
 ```
 NICK checker
 USER checker 0 * :A bot
+wait for 376 checker :End of MOTD command
 JOIN #checker
 PRIVMSG #checker :Hello!
-PRIVMSG #checker :Just checking that the server is still up
-PRIVMSG #checker :Goodbye!
 PING irc.frothy7650.org
-quit PONG
+quit on PONG irc.frothy7650.org :irc.frothy7650.org
 ```
-we have the PING and PONG commands to make sure that the server received the messages correctly, and responds properly.
 
 ## Build and install
-Requires [Vlang](https://github.com/vlang/v) to be installed
+
+Requires [Vlang](https://github.com/vlang/v) to be installed.
+
 ```sh
 ./make.vsh install
 ```
 
 ## Errors
+
 | code | error |
 |------|-------|
 | 1 | Failed to change SIGINT handler |
-| 2 | Failed to parse arguments correctly |
-| 3 | Failed to create/clear logfile |
-| 4 | GET request failed too many times |
-| 5 | Failed to write to file |
-| 6 | Failed to print summary(should basically never happen) |
+| 2 | Failed to parse arguments |
+| 4 | Request failed too many times |
+| 6 | Failed to print summary |
 | 7 | Invalid number in arguments |
 | 8 | TCP connection close failure |

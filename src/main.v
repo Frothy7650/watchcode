@@ -32,18 +32,18 @@ fn main() {
 	}
 
 	if state.cfg.log_path != '' {
-    persist_stderr_to_disk(state.cfg.log_path)
-    if state.cfg.script_log_path != '' {
-      persist_stdout_to_disk(state.cfg.script_log_path)
-    } else {
-      redirect_stdout_to_stderr()
-    }
-  } else {
-    redirect_stderr_to_stdout()
-    if state.cfg.script_log_path != '' {
-      persist_stdout_to_disk(state.cfg.script_log_path)
-    }
-  }
+		persist_stderr_to_disk(state.cfg.log_path)
+		if state.cfg.script_log_path != '' {
+			persist_stdout_to_disk(state.cfg.script_log_path)
+		} else {
+			redirect_stdout_to_stderr()
+		}
+	} else {
+		redirect_stderr_to_stdout()
+		if state.cfg.script_log_path != '' {
+			persist_stdout_to_disk(state.cfg.script_log_path)
+		}
+	}
 
 	for i := 0; i != state.cfg.loops; i++ {
 		if state.failures == state.cfg.tries {

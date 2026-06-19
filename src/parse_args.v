@@ -76,6 +76,7 @@ fn parse_args(args []string) !Config {
 					}
 					else {}
 				}
+
 				i++
 			}
 			else {
@@ -97,12 +98,14 @@ fn parse_args(args []string) !Config {
 						'mc' { scheme = .mc }
 						else { return error('Unknown URL scheme: ${arg_scheme}') }
 					}
+
 					cfg.scheme = scheme
 				} else {
 					return error('unknown argument: ${arg}')
 				}
 			}
 		}
+
 		i++
 	}
 	if cfg.url == '' {
@@ -119,9 +122,9 @@ fn parse_args(args []string) !Config {
 	if cfg.format && cfg.log_path != '' {
 		cfg.format = false
 	}
-  if cfg.script_log_path != '' {
-    cfg.print_script_output = true
-  }
+	if cfg.script_log_path != '' {
+		cfg.print_script_output = true
+	}
 	return cfg
 }
 

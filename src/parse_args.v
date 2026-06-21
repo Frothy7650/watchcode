@@ -27,6 +27,8 @@ fn parse_args(args []string) !Config {
 				eprintln('\t-so\toutput script output to a file')
 				eprintln('\t-ci\tsend cookies with HTTP request')
 				eprintln('\t-co\tsave cookies from HTTP request')
+        eprintln('\nSupported schemes: http://, https://, tcp://, mc://, ssh://, redis://, ping://')
+        eprintln('the only schemes that can show output is http://, https://, tcp://')
 				exit(0)
 			}
 			'-v', '--version' {

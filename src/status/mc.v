@@ -116,19 +116,19 @@ fn mc(url string) !Status {
 
 	conn.close()!
 
-  status_json := json.decode(McStatus, buf.bytestr()) or {
-    panic('Internal error, failed to decode mc status into JSON: ${err}')
-  }
+	status_json := json.decode(McStatus, buf.bytestr()) or {
+		panic('Internal error, failed to decode mc status into JSON: ${err}')
+	}
 
-  ts := time.now().hhmmss()
+	ts := time.now().hhmmss()
 
-  status_var := Status{
-    ok: true
-    msg: '${url} at ${ts}: ${status_json.players.online}/${status_json.players.max} players, version ${status_json.version.name}'
-    raw: buf.bytestr()
-  }
+	status_var := Status{
+		ok:  true
+		msg: '${url} at ${ts}: ${status_json.players.online}/${status_json.players.max} players, version ${status_json.version.name}'
+		raw: buf.bytestr()
+	}
 
-  return status_var
+	return status_var
 }
 
 struct McStatus {

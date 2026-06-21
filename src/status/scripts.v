@@ -4,7 +4,7 @@ import time
 import net
 
 fn run_script(mut conn net.TcpConn, script_raw string, print_script bool) !string {
-  println('=== SCRIPT START ===')
+	println('=== SCRIPT START ===')
 	mut raw_buf := []u8{}
 	mut lines := []string{}
 	mut eof := false
@@ -16,11 +16,14 @@ fn run_script(mut conn net.TcpConn, script_raw string, print_script bool) !strin
 		if !eof {
 			eof = drain_data(mut conn, mut raw_buf, mut lines, print_script)
 		}
-		if cmd.starts_with('#') { continue }
+		if cmd.starts_with('#') { continue
+		 }
 		if cmd.starts_with('wait for') {
 			target := cmd.after('wait for ')
 			if target.len == 0 { return error('Invalid target in script') }
-			wait_for_string(target, mut conn, mut raw_buf, mut lines, print_script, eof) or { return err }
+			wait_for_string(target, mut conn, mut raw_buf, mut lines, print_script, eof) or {
+				return err
+			}
 			continue
 		}
 		if cmd.starts_with('sleep') {
@@ -33,7 +36,9 @@ fn run_script(mut conn net.TcpConn, script_raw string, print_script bool) !strin
 		if cmd.starts_with('quit on') {
 			target := cmd.after('quit on ')
 			if target.len == 0 { return error('Invalid target in script') }
-			wait_for_string(target, mut conn, mut raw_buf, mut lines, print_script, eof) or { return err }
+			wait_for_string(target, mut conn, mut raw_buf, mut lines, print_script, eof) or {
+				return err
+			}
 			return lines.join_lines()
 		}
 		if cmd.starts_with('if ') {
@@ -53,13 +58,14 @@ fn run_script(mut conn net.TcpConn, script_raw string, print_script bool) !strin
 		conn.write_string(cmd + '\r\n')!
 	}
 	if !eof {
-		for _ in 0..120 {
+		for _ in 0 .. 120 {
 			eof = drain_data(mut conn, mut raw_buf, mut lines, print_script)
-			if eof { break }
+			if eof { break
+			 }
 			time.sleep(time.millisecond * 50)
 		}
 	}
-  println('=== SCRIPT END ===')
+	println('=== SCRIPT END ===')
 	return lines.join_lines()
 }
 
@@ -87,7 +93,9 @@ fn process_raw_buf(mut raw_buf []u8, mut lines []string, print_script bool) {
 		}
 	}
 	if start > 0 {
-		unsafe { raw_buf = raw_buf[start..] }
+		unsafe {
+			raw_buf = raw_buf[start..]
+		}
 	}
 }
 

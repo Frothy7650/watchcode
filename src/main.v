@@ -56,7 +56,8 @@ fn main() {
 
 		// Get status
 		mut status_var := status.get_status(state.cfg.url, state.cfg.scheme, state.script,
-			state.cfg.format, state.cfg.print_script_output, state.cfg.cookies_in_path, state.cfg.cookies_out_path) or {
+			state.cfg.format, state.cfg.print_script_output, state.cfg.cookies_in_path,
+			state.cfg.cookies_out_path) or {
 			mut toprint := ''
 			if state.cfg.format {
 				toprint = chalk.red('${state.cfg.scheme} request failed: ${err}, retrying')

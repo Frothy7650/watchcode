@@ -25,8 +25,8 @@ fn parse_args(args []string) !Config {
 				eprintln('\t-b\toutput the HTTP/s request body')
 				eprintln('\t-p\tprint script output')
 				eprintln('\t-so\toutput script output to a file')
-        eprintln('\t-ci\tsend cookies with HTTP request')
-        eprintln('\t-co\tsave cookies from HTTP request')
+				eprintln('\t-ci\tsend cookies with HTTP request')
+				eprintln('\t-co\tsave cookies from HTTP request')
 				exit(0)
 			}
 			'-v', '--version' {
@@ -87,12 +87,12 @@ fn parse_args(args []string) !Config {
 					'-so' {
 						cfg.script_log_path = os.abs_path(value)
 					}
-          '-ci' {
-            cfg.cookies_in_path = os.abs_path(value)
-          }
-          '-co' {
-            cfg.cookies_out_path = os.abs_path(value)
-          }
+					'-ci' {
+						cfg.cookies_in_path = os.abs_path(value)
+					}
+					'-co' {
+						cfg.cookies_out_path = os.abs_path(value)
+					}
 					else {}
 				}
 

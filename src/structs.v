@@ -31,7 +31,7 @@ mut:
 	print_http_body     bool
 	print_script_output bool
 
-  // Cookies send/save
-  cookies_in_path  string
-  cookies_out_path string
+	// Cookies send/save
+	cookies_in_path  string
+	cookies_out_path string
 }

@@ -17,6 +17,7 @@ pub:
 	ok   bool
 	msg  string
 	meta map[string]string
+  output string
 	raw  string
 }
 

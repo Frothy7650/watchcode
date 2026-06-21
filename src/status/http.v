@@ -34,7 +34,6 @@ pub fn http(url string, format bool, cookies_in_path string, cookies_out_path st
 			meta[key] = val
 		}
 	}
-	meta['body'] = resp.body
 
 	ts := time.now().hhmmss()
 	ok := resp.status_code >= 200 && resp.status_code < 400
@@ -52,5 +51,6 @@ pub fn http(url string, format bool, cookies_in_path string, cookies_out_path st
 		ok:   ok
 		msg:  '${url} at ${ts}: ${status_code_and_msg}'
 		meta: meta
+    output: resp.body
 	}
 }

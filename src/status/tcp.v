@@ -1,6 +1,7 @@
 module status
 
 import frothy7650.chalk
+import scripts
 import time
 import net
 
@@ -26,7 +27,7 @@ fn tcp(url string, script ?string, format bool, print_script bool) !Status {
 		}
 	}
 
-	lines := if script != none { run_script(mut conn, script, print_script)! } else { '' }
+	lines := if script != none { scripts.run_script(mut conn, script, print_script)! } else { '' }
 
 	conn.close() or {
 		eprintln('Failed to close TCP connection: ${err}')
@@ -34,11 +35,11 @@ fn tcp(url string, script ?string, format bool, print_script bool) !Status {
 	}
 
 	mut meta := map[string]string{}
-	meta['script_lines'] = lines
 
 	return Status{
 		ok:   true
 		msg:  '${url} at ${time.now().hhmmss()}: ${if format { chalk.green('UP') } else { 'UP' }}'
 		meta: meta
+    output: lines
 	}
 }

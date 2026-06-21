@@ -75,9 +75,9 @@ fn main() {
 		state.times << elapsed.milliseconds()
 
 		// Print body if user wants it
-		if state.cfg.print_http_body && status_var.meta['body'] != '' {
+		if state.cfg.print_http_body && status_var.output != '' {
 			eprintln('>>> START')
-			eprintln(status_var.meta['body'])
+			eprintln(status_var.output)
 			eprintln('>>> END')
 		}
 

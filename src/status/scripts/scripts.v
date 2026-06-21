@@ -1,9 +1,9 @@
-module status
+module scripts
 
 import time
 import net
 
-fn run_script(mut conn net.TcpConn, script_raw string, print_script bool) !string {
+pub fn run_script(mut conn net.TcpConn, script_raw string, print_script bool) !string {
 	println('=== SCRIPT START ===')
 	mut raw_buf := []u8{}
 	mut lines := []string{}

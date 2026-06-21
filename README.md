@@ -24,6 +24,8 @@ URL schemes: `http://`, `https://`, `tcp://`, `mc://`
 | `-b` | Print HTTP response body |
 | `-p` | Print script output line by line |
 | `-so` | Write script output to a file |
+| `-ci` | Send cookies with GET request\(netscape format\) |
+| `-co` | Save cookies from GET request\(netscape format\) |
 
 ## Examples
 
@@ -40,6 +42,8 @@ watchcode -s script.wts -p tcp://host:port       # print script output
 watchcode -s script.wts -so out.log tcp://host:port  # log script output
 watchcode -s script.wts -l gen.log -so out.log tcp://host:port  # both logs
 watchcode mc://server.example.com          # Minecraft server status
+watchcode -ci cookies.in https://example.org
+watchcode -co cookies.out https://example.org
 ```
 
 ## Scripts

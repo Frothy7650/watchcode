@@ -125,7 +125,7 @@ fn mc(url string) !Status {
 	status_var := Status{
 		ok:  true
 		msg: '${url} at ${ts}: ${status_json.players.online}/${status_json.players.max} players, version ${status_json.version.name}'
-		raw: buf.bytestr()
+		output: buf.bytestr()
 	}
 
 	return status_var

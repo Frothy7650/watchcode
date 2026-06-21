@@ -4,7 +4,7 @@ import time
 import net
 
 fn run_script(mut conn net.TcpConn, script_raw string, print_script bool) !string {
-  println('script_start')
+  println('=== SCRIPT START ===')
 	mut raw_buf := []u8{}
 	mut lines := []string{}
 	mut eof := false
@@ -59,7 +59,7 @@ fn run_script(mut conn net.TcpConn, script_raw string, print_script bool) !strin
 			time.sleep(time.millisecond * 50)
 		}
 	}
-  println('script_end')
+  println('=== SCRIPT END ===')
 	return lines.join_lines()
 }
 

@@ -16,7 +16,7 @@ pub fn ssh(url_const string, format bool) !Status {
   mut conn := net.dial_tcp(url)!
   line := conn.read_line()
 
-  if !line.starts_with('SSH-2.0-OpenSSH_') {
+  if !line.starts_with('SSH-') {
     ok = false
   }
 

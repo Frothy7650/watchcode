@@ -100,7 +100,9 @@ fn parse_args(args []string) !Config {
 			}
 			else {
 				if arg.starts_with('http://') || arg.starts_with('https://')
-					|| arg.starts_with('tcp://') || arg.starts_with('mc://') {
+					|| arg.starts_with('tcp://') || arg.starts_with('mc://')
+          || arg.starts_with('ssh://') || arg.starts_with('redis://')
+          || arg.starts_with('ping://') {
 					cfg.url = if arg.starts_with('http://') || arg.starts_with('https://') {
 						arg
 					} else {
@@ -115,6 +117,9 @@ fn parse_args(args []string) !Config {
 						'https' { scheme = .http }
 						'tcp' { scheme = .tcp }
 						'mc' { scheme = .mc }
+            'ssh' { scheme = .ssh }
+            'redis' { scheme = .redis }
+            'ping' { scheme = .ping }
 						else { return error('Unknown URL scheme: ${arg_scheme}') }
 					}
 

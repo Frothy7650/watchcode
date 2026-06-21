@@ -7,6 +7,9 @@ pub fn get_status(url string, scheme Scheme, script ?string, format bool, print_
 		.http { http(url, format, cookies_in_path, cookies_out_path)! }
 		.tcp { tcp(url, script, format, print_script)! }
 		.mc { mc(url)! }
+    .ssh { ssh(url, format)! }
+    .redis { redis(url, format)! }
+    .ping { ping(url, format)! }
 	}
 
 	return status_var
@@ -25,4 +28,7 @@ pub enum Scheme {
 	http
 	tcp
 	mc
+  ssh
+  redis
+  ping
 }
